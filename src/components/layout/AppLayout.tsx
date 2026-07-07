@@ -10,7 +10,7 @@ export function AppLayout({ children }: PropsWithChildren) {
     <div className="flex h-screen">
       <Sidebar />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Header />
 
         <Workspace>{children}</Workspace>
