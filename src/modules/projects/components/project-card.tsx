@@ -1,30 +1,49 @@
+"use client";
+
+import { useState } from "react";
+
 import { Calendar, FolderKanban, MoreHorizontal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import type { Project } from "../types/project";
 
-type ProjectCardProps = Pick<
-  Project,
-  | "name"
-  | "description"
-  | "status"
-  | "updatedAt"
-  | "clients"
-  | "environments"
-  | "services"
->;
+type ProjectCardProps = {
+  project: Project;
+  onDelete: (id: number) => void;
+  onEdit: (project: Project) => void;
+};
 
-export function ProjectCard({
-  name,
-  description,
-  status,
-  updatedAt,
-  clients,
-  environments,
-  services,
-}: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onEdit }: ProjectCardProps) {
+  const {
+    name,
+    description,
+    status,
+    updatedAt,
+    clients,
+    environments,
+    services,
+  } = project;
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   return (
     <article
       className="
@@ -46,13 +65,31 @@ export function ProjectCard({
           <FolderKanban className="h-6 w-6" />
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="opacity-0 transition-opacity group-hover:opacity-100"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              />
+            }
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(project)}>
+              Edit project
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              Delete project
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="mt-5 space-y-3">
@@ -85,17 +122,36 @@ export function ProjectCard({
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar className="h-4 w-4" />
-          <span>Updated {updatedAt}</span>
-        </div>
-
-        <Badge variant="secondary">{status}</Badge>
-
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Calendar className="h-4 w-4" />
 
           <span>Updated {updatedAt}</span>
         </div>
       </div>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete project?</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This action cannot be undone. The project
+              <strong> {project.name}</strong> will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                onDelete(project.id);
+                setDeleteDialogOpen(false);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 }
